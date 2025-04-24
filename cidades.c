@@ -5,6 +5,18 @@
 
 #include "cidades.h"
 
+void selectionSortCidades(Cidade *cidades, int n) {
+    for (int i = 1; i < n; i++) {
+        Cidade atual = cidades[i];
+        int j = i - 1;
+        while (j >= 0 && cidades[j].Posicao > atual.Posicao) {
+            cidades[j + 1] = cidades[j];
+            j--;
+        }
+        cidades[j + 1] = atual;
+    }
+}
+
 Estrada *getEstrada(const char *nomeArquivo){
     FILE *arquivo = fopen(nomeArquivo, "r");
     if(arquivo == NULL){
@@ -89,7 +101,10 @@ Estrada *getEstrada(const char *nomeArquivo){
 
     free(posicoes);
     fclose(arquivo);
-    printf("[DEBUG] Leitura do arquivo concluída com sucesso.\n");
+
+    selectionSortCidades(estrada -> C, estrada -> N);
+
+    printf("Leitura do arquivo concluída com sucesso.\n");
     
     return e;
 }
