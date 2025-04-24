@@ -16,6 +16,19 @@ void selectionSortCidades(Cidade *cidades, int n) {
         cidades[j + 1] = atual;
     }
 }
+// função auxiliar | calculo vizinhanca
+double calcularVizinhanca(Estrada *estrada, int i) {
+    if (i == 0) {
+        return (estrada->C[1].Posicao - estrada->C[0].Posicao) / 2.0 + estrada->C[0].Posicao - 0;
+    } else if (i == estrada->N - 1) {
+        return estrada->T - ((estrada->C[i].Posicao + estrada->C[i - 1].Posicao) / 2.0);
+    } else {
+        double esquerda = (estrada->C[i].Posicao + estrada->C[i - 1].Posicao) / 2.0;
+        double direita = (estrada->C[i + 1].Posicao + estrada->C[i].Posicao) / 2.0;
+        return direita - esquerda;
+    }
+}
+
 
 Estrada *getEstrada(const char *nomeArquivo){
     FILE *arquivo = fopen(nomeArquivo, "r");
@@ -27,13 +40,13 @@ Estrada *getEstrada(const char *nomeArquivo){
     int T, N;                     
     
     if(fscanf(arquivo, "%d", &T) != 1 || T < 3 || T > pow(10,6)){ 
-        printf("[DEBUG] Valor de T é inválido: %d\n", T);
+        printf("[DEBUG] Valor de T é invalido: %d\n", T);
         fclose(arquivo);
         return NULL; 
     }
 
     if(fscanf(arquivo, "%d", &N) != 1 || N < 2 || N > pow(10,4)){ 
-        printf("[DEBUG] Valor de N é inválido: %d\n", N);
+        printf("[DEBUG] Valor de N e invalido: %d\n", N);
         fclose(arquivo);
         return NULL; 
     }
@@ -42,7 +55,7 @@ Estrada *getEstrada(const char *nomeArquivo){
     // alocando memória para armazenar os itens na struct/ lista principal 
     Estrada *e = malloc(sizeof(Estrada));
     if(e == NULL){
-        printf("[DEBUG] Falha ao alocar memória para lista!\n");
+        printf("[DEBUG] Falha ao alocar memoria para lista!\n");
         fclose(arquivo);
         return NULL;
     }
@@ -53,7 +66,7 @@ Estrada *getEstrada(const char *nomeArquivo){
     // alocação dinamica do vetor de cidades, guardando o número de cidades
     e->C = malloc(N * sizeof(Cidade));
     if(e->C == NULL){
-        printf("[DEBUG] Falha ao alocar memória para o vetor de cidades\n");
+        printf("[DEBUG] Falha ao alocar memoria para o vetor de cidades\n");
         free(e);
         fclose(arquivo);
         return NULL;
@@ -62,7 +75,7 @@ Estrada *getEstrada(const char *nomeArquivo){
     // vetor auxiliar que armazena as posições xi lidas, verificando se alguma se repete
     int *posicoes = malloc(N * sizeof(int));
     if(posicoes == NULL){
-        printf("[DEBUG] Falha ao alocar memória para vetor auxiliar de posições\n");
+        printf("[DEBUG] Falha ao alocar memoria para vetor auxiliar de posições\n");
         free(e->C);
         free(e);
         fclose(arquivo);
@@ -73,7 +86,7 @@ Estrada *getEstrada(const char *nomeArquivo){
         int pos; // guarda a posição da cidade (distância da fronteira)
         char nome[256]; 
         if (fscanf(arquivo, "%d %[^\n]", &pos, nome) != 2 || pos <= 0 || pos >= T){
-            printf("[DEBUG] Erro ao ler cidade %d: posição inválida (%d) ou leitura falhou.\n", i + 1, pos);
+            printf("[DEBUG] Erro ao ler cidade %d: posicao invalida (%d) ou leitura falhou.\n", i + 1, pos);
             free(posicoes);
             free(e->C);
             free(e);
@@ -83,7 +96,7 @@ Estrada *getEstrada(const char *nomeArquivo){
 
         for(int j = 0; j < i; j++){
             if(posicoes[j] == pos ){
-                printf("[DEBUG] Posição duplicada: %d\n", pos);
+                printf("[DEBUG] Posicao duplicada: %d\n", pos);
                 free(posicoes);
                 free(e->C);
                 free(e);
@@ -96,7 +109,7 @@ Estrada *getEstrada(const char *nomeArquivo){
         e->C[i].Posicao = pos;
         strcpy(e->C[i].Nome, nome);
 
-        printf("[DEBUG] Cidade %d lida: %s na posição %d\n", i + 1, nome, pos);
+    // printf("[DEBUG] Cidade %d lida: %s na posicao %d\n", i + 1, nome, pos);
     }
 
     free(posicoes);
@@ -105,33 +118,24 @@ Estrada *getEstrada(const char *nomeArquivo){
     //ordena as cidades 
     selectionSortCidades(e -> C, e -> N);
 
-    printf("Leitura do arquivo concluída com sucesso.\n");
+    // printf("Leitura do arquivo concluida com sucesso.\n");
     
     return e;
 }
 
 double calcularMenorVizinhanca (const char *nomeArquivo){
     Estrada *estrada = getEstrada (nomeArquivo);
-        if(estrada == NULL){
-            return -1.0;
-        }
-    
+    if(estrada == NULL){
+        return -1.0;
+    }
+
     double menor = estrada->T;
-    
-    for(int i = 0;i < estrada -> N; i++){
-        double vizinhanca;
-            if( i == 0 ){
-                vizinhanca = (estrada -> C[1].Posicao - estrada -> C[0].Posicao) / 2.0 + estrada -> C[0].Posicao;
-            }
-                else if ( i == estrada -> N-1 ) {
-                    vizinhanca = (estrada ->C[i].Posicao - estrada ->C[i - 1].Posicao) /2.0 + (estrada -> T - estrada ->C[i].Posicao);//
-                }
-                    else{
-                        vizinhanca = (estrada->C[i + 1].Posicao - estrada->C[i - 1].Posicao) / 2.0;
-            }
-            if(vizinhanca < menor){
-                menor = vizinhanca;
-            }
+
+    for(int i = 0; i < estrada -> N; i++){
+        double vizinhanca = calcularVizinhanca(estrada, i);
+        if(vizinhanca < menor){
+            menor = vizinhanca;
+        }
     }
     free(estrada -> C);
     free(estrada);
@@ -144,20 +148,11 @@ char *cidadeMenorVizinhanca(const char *nomeArquivo){
         return NULL;
     } 
 
-    double menor = 1e9;
+    double menor = estrada->T;
     int indiceMenor = -1;
 
     for (int i = 0; i < estrada->N; i++) {
-        double vizinhanca;
-
-        if (i == 0) {
-            vizinhanca = (estrada->C[1].Posicao - estrada->C[0].Posicao) / 2.0 + estrada->C[0].Posicao;
-        } else if (i == estrada->N - 1) {
-            vizinhanca = (estrada->C[i].Posicao - estrada->C[i - 1].Posicao) / 2.0 + (estrada->T - estrada->C[i].Posicao);
-        } else {
-            vizinhanca = (estrada->C[i + 1].Posicao - estrada->C[i - 1].Posicao) / 2.0;
-        }
-
+        double vizinhanca = calcularVizinhanca(estrada, i);
         if (vizinhanca < menor) {
             menor = vizinhanca;
             indiceMenor = i;
