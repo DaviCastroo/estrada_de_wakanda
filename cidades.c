@@ -83,7 +83,7 @@ Estrada *getEstrada(const char *nomeArquivo){
 
         for(int j = 0; j < i; j++){
             if(posicoes[j] == pos ){
-                printf("[DEBUG] Posição duplicada detectada: %d\n", pos);
+                printf("[DEBUG] Posição duplicada: %d\n", pos);
                 free(posicoes);
                 free(e->C);
                 free(e);
@@ -102,9 +102,69 @@ Estrada *getEstrada(const char *nomeArquivo){
     free(posicoes);
     fclose(arquivo);
 
+    //ordena as cidades 
     selectionSortCidades(estrada -> C, estrada -> N);
 
     printf("Leitura do arquivo concluída com sucesso.\n");
     
     return e;
+}
+
+double calcularMenorVizinhanca (const char *nomeArquivo){
+    Estrada *estrada = getEstrada (*nomeArquivo);
+        if(*estrada == NULL){
+            return NULL;
+        }
+    
+    double menor; 
+    for(int i = 0;i < estrada -> N; i++){
+        double vizinhaca;
+            if( i == 0 ){
+                vizinhaca = (estrada -> C[1].Posicao - estrada -> C[0].Posicao) / 2.0 + estrada -> C[0].Posicao
+            }
+                else if ( i == estrada -> N-1 ) {
+                    vizinhaca = (estrada ->C[i].Posicao - estrada ->C[i - 1].Posicao) /2.0 + (estrada -> T - estrada ->C[i].Posicao);//
+                }
+                    else{
+                        vizinhanca = (estrada->C[i + 1].Posicao - estrada->C[i - 1].Posicao) / 2.0;
+            }
+            if(vizinhaca < menor){
+                menor = vizinhaca;
+            }
+    }
+    free(estrada -> C);
+    free(estrada)
+    return menor;
+}
+
+char *cidadeMenorVizinhanca(const char *nomeArquivo){
+    Estrada *estrada = getEstrada(nomeArquivo);
+    if (!estrada) return NULL;
+
+    double menor = 1e9;
+    int indiceMenor = -1;
+
+    for (int i = 0; i < estrada->N; i++) {
+        double vizinhanca;
+
+        if (i == 0) {
+            vizinhanca = (estrada->C[1].Posicao - estrada->C[0].Posicao) / 2.0 + estrada->C[0].Posicao;
+        } else if (i == estrada->N - 1) {
+            vizinhanca = (estrada->C[i].Posicao - estrada->C[i - 1].Posicao) / 2.0 + (estrada->T - estrada->C[i].Posicao);
+        } else {
+            vizinhanca = (estrada->C[i + 1].Posicao - estrada->C[i - 1].Posicao) / 2.0;
+        }
+
+        if (vizinhanca < menor) {
+            menor = vizinhanca;
+            indiceMenor = i;
+        }
+    }
+
+    char *nomeCidade = strdup(estrada->C[indiceMenor].Nome);
+
+    free(estrada->C);
+    free(estrada);
+
+    return nomeCidade;
 }
