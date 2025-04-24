@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h> 
+
 #include "cidades.h"
 
 Estrada *getEstrada(const char *nomeArquivo){
@@ -89,5 +90,6 @@ Estrada *getEstrada(const char *nomeArquivo){
     free(posicoes);
     fclose(arquivo);
     printf("[DEBUG] Leitura do arquivo concluída com sucesso.\n");
+    
     return e;
 }
