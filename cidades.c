@@ -103,7 +103,7 @@ Estrada *getEstrada(const char *nomeArquivo){
     fclose(arquivo);
 
     //ordena as cidades 
-    selectionSortCidades(estrada -> C, estrada -> N);
+    selectionSortCidades(e -> C, e -> N);
 
     printf("Leitura do arquivo concluída com sucesso.\n");
     
@@ -111,35 +111,38 @@ Estrada *getEstrada(const char *nomeArquivo){
 }
 
 double calcularMenorVizinhanca (const char *nomeArquivo){
-    Estrada *estrada = getEstrada (*nomeArquivo);
-        if(*estrada == NULL){
-            return NULL;
+    Estrada *estrada = getEstrada (nomeArquivo);
+        if(estrada == NULL){
+            return -1.0;
         }
     
-    double menor; 
+    double menor = estrada->T;
+    
     for(int i = 0;i < estrada -> N; i++){
-        double vizinhaca;
+        double vizinhanca;
             if( i == 0 ){
-                vizinhaca = (estrada -> C[1].Posicao - estrada -> C[0].Posicao) / 2.0 + estrada -> C[0].Posicao
+                vizinhanca = (estrada -> C[1].Posicao - estrada -> C[0].Posicao) / 2.0 + estrada -> C[0].Posicao;
             }
                 else if ( i == estrada -> N-1 ) {
-                    vizinhaca = (estrada ->C[i].Posicao - estrada ->C[i - 1].Posicao) /2.0 + (estrada -> T - estrada ->C[i].Posicao);//
+                    vizinhanca = (estrada ->C[i].Posicao - estrada ->C[i - 1].Posicao) /2.0 + (estrada -> T - estrada ->C[i].Posicao);//
                 }
                     else{
                         vizinhanca = (estrada->C[i + 1].Posicao - estrada->C[i - 1].Posicao) / 2.0;
             }
-            if(vizinhaca < menor){
-                menor = vizinhaca;
+            if(vizinhanca < menor){
+                menor = vizinhanca;
             }
     }
     free(estrada -> C);
-    free(estrada)
+    free(estrada);
     return menor;
 }
 
 char *cidadeMenorVizinhanca(const char *nomeArquivo){
     Estrada *estrada = getEstrada(nomeArquivo);
-    if (!estrada) return NULL;
+    if (estrada == NULL){
+        return NULL;
+    } 
 
     double menor = 1e9;
     int indiceMenor = -1;
